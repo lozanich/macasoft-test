@@ -9,7 +9,8 @@ use App\Http\Controllers\Controller;
 
 class UserApiController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $users = User::get();
         return response()->json($users);
     }
@@ -19,7 +20,6 @@ class UserApiController extends Controller
     {
         $user->fill($request->all());
         $user->save();
-
         return response()->json($user->toArray());
     }
 
