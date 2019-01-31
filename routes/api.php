@@ -26,3 +26,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::get('user', 'AuthController@user');
     });
 });
+
+Route::group(['namespace' => 'Api', 'middleware' => 'auth:api'], function () {
+    Route::resource('users', 'UserApiController');
+});
