@@ -11,12 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/{any}', function () {
+    return view('users.home');
+})->where('any', '.*');
 
-Route::group(['middleware' => ['auth']], function () {
-    Route::get('/{any}', function () {
-        return view('users.home');
-    })->where('any', '.*');
-});
