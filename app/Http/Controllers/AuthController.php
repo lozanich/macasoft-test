@@ -24,8 +24,7 @@ class AuthController extends Controller
             'user_photo' => $request->user_photo,
         ]);
         $user->save();
-        var_dump('saved');
-        exit();
+
         return response()->json([
             'message' => 'Successfully created user!'], 201);
     }
@@ -42,6 +41,8 @@ class AuthController extends Controller
                 'message' => 'Unauthorized'], 401);
         }
         $user = $request->user();
+        $token_return = User::find($request->user()->id)->generateToken();
+
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         if ($request->remember_me) {
@@ -51,6 +52,8 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'token_type'   => 'Bearer',
+            'api_token'    => $token_return,
+            'id_user'      => $request->user()->id,
             'expires_at'   => Carbon::parse(
                 $tokenResult->token->expires_at
             )
@@ -60,7 +63,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
+        $id_user = $request->all();
+        $user = User::find($id_user[0]);
+        $user->api_token = null;
+        $user->save();
+
         return response()->json(['message' =>
             'Successfully logged out']);
     }

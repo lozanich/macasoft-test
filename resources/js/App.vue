@@ -5,13 +5,16 @@
         <router-link class="navbar-brand" to="/">Home</router-link>
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link to="/create" class="nav-link">Create User</router-link>
+            <router-link to="/create" class="nav-link" v-if="this.isLoggedIn">Create User</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/users" class="nav-link">Users</router-link>
+            <router-link to="/users" class="nav-link" v-if="this.isLoggedIn">Users</router-link>
           </li>
           <li class="nav-item" v-if="!this.isLoggedIn">
             <router-link to="/login" class="nav-link">Login</router-link>
+          </li>
+          <li class="nav-item" v-if="this.isLoggedIn">
+            <a href="#" @click.prevent="logout" class="nav-link">Logout</a>
           </li>
         </ul>
       </div>
@@ -39,12 +42,34 @@
   export default{
     data(){
       return {
-        isLoggedIn : true,
-        name : null
+        isLoggedIn : false,
+        name : null,
+        api_token: {},
+        id_user: null
       }
     },
     mounted(){
-      console.log('App mounted');
+      this.isLoggedIn = localStorage.getItem('logged')
+      this.api_token  = localStorage.getItem('api_token')
+      this.id_user    = localStorage.getItem('id_user')
+    },
+    methods: {
+      logout() {
+
+        var token = document.head.querySelector('meta[name="csrf-token"]');
+        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+        axios.defaults.headers.common['Authorization'] = 'Bearer '+ this.api_token
+        axios.post('api/auth/logout', [this.id_user])
+        .then((res) => {
+          this.isLoggedIn = false
+          localStorage.setItem('logged', 'false');
+          this.$router.push('/login');
+        })
+        .catch((err) => {
+          console.log('error')
+          console.log(err)
+        });
+      }
     }
   }
 </script>

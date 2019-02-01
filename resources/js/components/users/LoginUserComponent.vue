@@ -51,17 +51,17 @@
     },
     methods: {
       login(){
-        var isLoggedIn = $("meta[name=login-status]").attr('content');
-        console.log('logged');
-        console.log(isLoggedIn);
         var token = document.head.querySelector('meta[name="csrf-token"]');
         window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
         axios.post('api/auth/login', this.user)
           .then((res) => {
-            console.log(res);
-            let access_token = res.data.token;
-            console.log(access_token);
-            localStorage.setItem('token', access_token);
+            //console.log(res);
+            let access_token = res.data.api_token;
+            let id_user = res.data.id_user;
+            //console.log(access_token);
+            localStorage.setItem('api_token', access_token);
+            localStorage.setItem('logged', 'true');
+            localStorage.setItem('id_user', id_user);
             this.$router.push('/');
           })
           .catch((err) => {

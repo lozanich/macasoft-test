@@ -1799,15 +1799,40 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      isLoggedIn: true,
-      name: null
+      isLoggedIn: false,
+      name: null,
+      api_token: {},
+      id_user: null
     };
   },
   mounted: function mounted() {
-    console.log('App mounted');
+    this.isLoggedIn = localStorage.getItem('logged');
+    this.api_token = localStorage.getItem('api_token');
+    this.id_user = localStorage.getItem('id_user');
+  },
+  methods: {
+    logout: function logout() {
+      var _this = this;
+
+      var token = document.head.querySelector('meta[name="csrf-token"]');
+      window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token;
+      axios.post('api/auth/logout', [this.id_user]).then(function (res) {
+        _this.isLoggedIn = false;
+        localStorage.setItem('logged', 'false');
+
+        _this.$router.push('/login');
+      }).catch(function (err) {
+        console.log('error');
+        console.log(err);
+      });
+    }
   }
 });
 
@@ -1967,10 +1992,120 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   /*name: "IndexUserComponent"*/
+  data: function data() {
+    return {
+      isLoggedIn: false,
+      api_token: {},
+      id_user: null,
+      user: {
+        full_name: '',
+        email: '',
+        id_rol: '',
+        user_photo: ''
+      },
+      errors: [],
+      users: [],
+      validationErrors: ''
+    };
+  },
   mounted: function mounted() {
-    console.log('Index component mounted');
+    this.api_token = localStorage.getItem('api_token');
+    this.id_user = localStorage.getItem('id_user');
+    this.readUsers();
+  },
+  methods: {
+    initAddUser: function initAddUser() {
+      $("#add_task_model").modal("show");
+    },
+    createUser: function createUser() {
+      console.log('creating user');
+    },
+    readUsers: function readUsers() {
+      var _this = this;
+
+      var token = document.head.querySelector('meta[name="csrf-token"]');
+      window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token;
+      axios.get('api/users').then(function (response) {
+        _this.users = response.data;
+      });
+    }
   }
 });
 
@@ -2039,16 +2174,16 @@ __webpack_require__.r(__webpack_exports__);
     login: function login() {
       var _this = this;
 
-      var isLoggedIn = $("meta[name=login-status]").attr('content');
-      console.log('logged');
-      console.log(isLoggedIn);
       var token = document.head.querySelector('meta[name="csrf-token"]');
       window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
       axios.post('api/auth/login', this.user).then(function (res) {
-        console.log(res);
-        var access_token = res.data.token;
-        console.log(access_token);
-        localStorage.setItem('token', access_token);
+        //console.log(res);
+        var access_token = res.data.api_token;
+        var id_user = res.data.id_user; //console.log(access_token);
+
+        localStorage.setItem('api_token', access_token);
+        localStorage.setItem('logged', 'true');
+        localStorage.setItem('id_user', id_user);
 
         _this.$router.push('/');
       }).catch(function (err) {
@@ -37596,11 +37731,13 @@ var render = function() {
                 "li",
                 { staticClass: "nav-item" },
                 [
-                  _c(
-                    "router-link",
-                    { staticClass: "nav-link", attrs: { to: "/create" } },
-                    [_vm._v("Create User")]
-                  )
+                  this.isLoggedIn
+                    ? _c(
+                        "router-link",
+                        { staticClass: "nav-link", attrs: { to: "/create" } },
+                        [_vm._v("Create User")]
+                      )
+                    : _vm._e()
                 ],
                 1
               ),
@@ -37609,11 +37746,13 @@ var render = function() {
                 "li",
                 { staticClass: "nav-item" },
                 [
-                  _c(
-                    "router-link",
-                    { staticClass: "nav-link", attrs: { to: "/users" } },
-                    [_vm._v("Users")]
-                  )
+                  this.isLoggedIn
+                    ? _c(
+                        "router-link",
+                        { staticClass: "nav-link", attrs: { to: "/users" } },
+                        [_vm._v("Users")]
+                      )
+                    : _vm._e()
                 ],
                 1
               ),
@@ -37631,6 +37770,25 @@ var render = function() {
                     ],
                     1
                   )
+                : _vm._e(),
+              _vm._v(" "),
+              this.isLoggedIn
+                ? _c("li", { staticClass: "nav-item" }, [
+                    _c(
+                      "a",
+                      {
+                        staticClass: "nav-link",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.logout($event)
+                          }
+                        }
+                      },
+                      [_vm._v("Logout")]
+                    )
+                  ])
                 : _vm._e()
             ])
           ],
@@ -37805,7 +37963,7 @@ var staticRenderFns = [
             ]),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
-              _vm._v("\n          I'm the Home Component component.\n        ")
+              _vm._v("\n          Welcome\n        ")
             ])
           ])
         ])
@@ -37834,24 +37992,314 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", { staticClass: "container" }, [
+    _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-md-12" }, [
+        _c("div", { staticClass: "panel-heading" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-primary btn-xs pull-right",
+              on: {
+                click: function($event) {
+                  _vm.initAddUser()
+                }
+              }
+            },
+            [_vm._v("\n          + Agregar nuevo usuario\n        ")]
+          ),
+          _vm._v(" "),
+          _c("hr"),
+          _vm._v(" "),
+          _c("h2", [_vm._v("Mis usuarios")])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "panel-body" }, [
+          _c("table", { staticClass: "table" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.users, function(user, index) {
+                return _c("tr", [
+                  _c("td", [_vm._v(_vm._s(index + 1))]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { scope: "row" } }, [
+                    _vm._v(_vm._s(user.full_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(user.email))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(user.id_rol))]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("img", {
+                      attrs: {
+                        width: "50",
+                        height: "50",
+                        src: "storage/images/" + user.user_photo
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(1, true)
+                ])
+              }),
+              0
+            )
+          ])
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: { tabindex: "-1", role: "dialog", id: "add_task_model" }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c(
+              "div",
+              { staticClass: "modal-content" },
+              [
+                _vm._m(2),
+                _vm._v(" "),
+                _vm.validationErrors
+                  ? _c("validation-errors", {
+                      attrs: { errors: _vm.validationErrors }
+                    })
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-body" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "full_name" } }, [
+                      _vm._v("Nombre Completo:")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.full_name,
+                          expression: "user.full_name"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "text",
+                        name: "full_name",
+                        id: "full_name",
+                        placeholder: "Nombre completo"
+                      },
+                      domProps: { value: _vm.user.full_name },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.user, "full_name", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "email" } }, [
+                      _vm._v("Email:")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.full_name,
+                          expression: "user.full_name"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "email",
+                        name: "email",
+                        id: "email",
+                        placeholder: "Email"
+                      },
+                      domProps: { value: _vm.user.full_name },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.user, "full_name", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "rol" } }, [
+                      _vm._v("Example select")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.user.id_rol,
+                            expression: "user.id_rol"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { id: "rol" },
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.user,
+                              "id_rol",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "1", selected: "" } }, [
+                          _vm._v("Administrador")
+                        ]),
+                        _vm._v(" "),
+                        _c("option", { attrs: { value: "2" } }, [
+                          _vm._v("Usuario")
+                        ]),
+                        _vm._v(" "),
+                        _c("option", { attrs: { value: "3" } }, [
+                          _vm._v("Vendedor")
+                        ])
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "user_photo" } }, [
+                      _vm._v("Foto del usuario")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "change",
+                          rawName: "v-change",
+                          value: _vm.user.user_photo,
+                          expression: "user.user_photo"
+                        }
+                      ],
+                      staticClass: "form-control-file",
+                      attrs: { type: "file", id: "user_photo" }
+                    })
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-default",
+                      attrs: { type: "button", "data-dismiss": "modal" }
+                    },
+                    [_vm._v("Cerrar")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary",
+                      attrs: { type: "button" },
+                      on: { click: _vm.createUser }
+                    },
+                    [_vm._v("Guargar")]
+                  )
+                ])
+              ],
+              1
+            )
+          ]
+        )
+      ]
+    )
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row justify-content-center" }, [
-      _c("div", { staticClass: "col-md-8" }, [
-        _c("div", { staticClass: "card card-default" }, [
-          _c("div", { staticClass: "card-header" }, [
-            _vm._v("Index Component")
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "card-body" }, [
-            _vm._v("\n        I'm the Index Component component.\n      ")
-          ])
-        ])
+    return _c("thead", { staticClass: "thead-dark" }, [
+      _c("tr", [
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("#")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Nombre completo")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Email")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Rol")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Foto")]),
+        _vm._v(" "),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Acciones")])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("td", [
+      _c("button", { staticClass: "btn btn-success btn-xs" }, [
+        _vm._v("Editar")
+      ]),
+      _vm._v(" "),
+      _c("button", { staticClass: "btn btn-danger btn-xs" }, [
+        _vm._v("Eliminar")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-header" }, [
+      _c(
+        "button",
+        {
+          staticClass: "close",
+          attrs: {
+            type: "button",
+            "data-dismiss": "modal",
+            "aria-label": "Close"
+          }
+        },
+        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+      ),
+      _vm._v(" "),
+      _c("h4", { staticClass: "modal-title" }, [
+        _vm._v("Agregar nuevo usuario")
       ])
     ])
   }
@@ -52561,8 +53009,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Applications/MAMP/htdocs/macasoft-test/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /Applications/MAMP/htdocs/macasoft-test/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\ivan.lozano\Documents\Code\macasoft-test\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\ivan.lozano\Documents\Code\macasoft-test\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
