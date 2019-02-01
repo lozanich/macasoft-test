@@ -28,7 +28,7 @@ class UserApiRequest extends FormRequest
           'email' => 'required|string|email',
           'password' => 'required|string|confirmed',
           'password_confirmation' => 'required',
-          'rol' => 'required',
+          'id_rol' => 'required',
           'user_photo' => 'required',
         ];
 
@@ -42,7 +42,7 @@ class UserApiRequest extends FormRequest
           'email.required' => __('validation.required', ['attribute' => 'email']),
           'password.required' => __('validation.required', ['attribute' => 'password']),
           'password_confirmation.required' => __('validation.required', ['attribute' => 'password_confirmation']),
-          'rol.required' => __('validation.required', ['attribute' => 'rol']),
+          'id_rol.required' => __('validation.required', ['attribute' => 'id_rol']),
           'user_photo.required' => __('validation.required', ['attribute' => 'user_photo']),
         ];
     }

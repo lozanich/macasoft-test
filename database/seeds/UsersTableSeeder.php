@@ -19,7 +19,7 @@ class UsersTableSeeder extends Seeder
                 'full_name' => 'admin',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('Admin.2019'),
-                'rol' => 'administrador',
+                'id_rol' => 1,
                 'user_photo' => $faker->image('public/storage/images', 400, 300, null, false),
                 'api_token' => str_random(60),
             ]);

@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
   <link href="{{ mix('css/app.css') }}" type="text/css" rel="stylesheet"/>
   <meta name="csrf-token" value="{{ csrf_token() }}"/>
+  <meta name="token" id="token" value="{{ auth()->check() ? auth()->user()->api_token : null }}">
 </head>
 <body>
 

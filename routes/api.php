@@ -29,4 +29,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 Route::group(['namespace' => 'Api', 'middleware' => 'auth:api'], function () {
     Route::resource('users', 'UserApiController');
+    Route::get('roles/{id}', function ($id) {
+        return \App\Models\Roles::find($id);
+    });
 });

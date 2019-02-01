@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Roles;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -17,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'full_name', 'email', 'password', 'rol', 'user_photo', 'api_token'
+        'full_name', 'email', 'password', 'id_rol', 'user_photo', 'api_token'
     ];
 
     /**
@@ -28,6 +29,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function roles()
+    {
+        return $this->hasOne(Roles::class, 'id_rol');
+    }
 
     public function generateToken()
     {

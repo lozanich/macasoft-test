@@ -33,7 +33,7 @@ class UsersApiTest extends TestCase
         $responseData = $response->decodeResponseJson();
         $this->assertArrayHasKey('full_name', $responseData[0]);
         $this->assertArrayHasKey('email', $responseData[0]);
-        $this->assertArrayHasKey('rol', $responseData[0]);
+        $this->assertArrayHasKey('id_rol', $responseData[0]);
         $this->assertArrayHasKey('user_photo', $responseData[0]);
     }
 
@@ -49,7 +49,7 @@ class UsersApiTest extends TestCase
           "email" => '',
           "password" => '',
           "password_confirmation" => '',
-          "rol" => '',
+          "id_rol" => '',
           "userPhoto" => '',
         ], $headers);
         $responseData = $response->decodeResponseJson();
@@ -57,7 +57,7 @@ class UsersApiTest extends TestCase
         $this->assertArrayHasKey('email', $responseData['errors']);
         $this->assertArrayHasKey('password', $responseData['errors']);
         $this->assertArrayHasKey('password_confirmation', $responseData['errors']);
-        $this->assertArrayHasKey('rol', $responseData['errors']);
+        $this->assertArrayHasKey('id_rol', $responseData['errors']);
         $this->assertArrayHasKey('user_photo', $responseData['errors']);
     }
 
@@ -71,7 +71,7 @@ class UsersApiTest extends TestCase
         $fullName = $faker->name;
         $email = $faker->email;
         $password = Hash::make('Admin.2019');
-        $rol = 'usuario';
+        $rol = 2;
         $userPhoto = $faker->image('public/storage/images', 400, 300, null, false);
 
         $headers = ['Authorization' => "Bearer $auth->api_token"];
@@ -80,14 +80,14 @@ class UsersApiTest extends TestCase
           "email" => $email,
           "password" => $password,
           "password_confirmation" => $password,
-          "rol" => $rol,
+          "id_rol" => $rol,
           "user_photo" => $userPhoto,
         ], $headers);
 
         $this->seeInDatabase('users', [
           "full_name" => $fullName,
           "email" => $email,
-          "rol" => $rol,
+          "id_rol" => $rol,
           "user_photo" => $userPhoto,
         ]);
     }
@@ -125,7 +125,7 @@ class UsersApiTest extends TestCase
           "id" => $userToDelete->id,
           "full_name" => $userToDelete->fullName,
           "email" => $userToDelete->email,
-          "rol" => $userToDelete->rol,
+          "id_rol" => $userToDelete->rol,
           "user_photo" => $userToDelete->user_photo,
         ]);
 
