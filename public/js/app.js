@@ -1979,12 +1979,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       user: {
         email: null,
-        password: null
+        password: null,
+        message: false
       }
     };
   },
@@ -1992,17 +1995,19 @@ __webpack_require__.r(__webpack_exports__);
     login: function login() {
       var _this = this;
 
+      var app = this;
       var token = document.head.querySelector('meta[name="csrf-token"]');
       window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
       axios.post('api/auth/login', this.user).then(function (res) {
         console.log(res);
-        var token = res.data.token;
-        console.log(token);
-        localStorage.setItem('token', token);
+        var access_token = res.data.token;
+        console.log(access_token);
+        localStorage.setItem('token', access_token);
 
-        _this.$router.push('/home');
+        _this.$router.push('/');
       }).catch(function (err) {
-        return console.error(err);
+        console.error(err);
+        app.message = true;
       });
     }
   }
@@ -37793,6 +37798,16 @@ var render = function() {
       _c("div", { staticClass: "card card-default" }, [
         _c("div", { staticClass: "card-header" }, [_vm._v("Login")]),
         _vm._v(" "),
+        _vm.message
+          ? _c("div", { staticClass: "alert alert-danger" }, [
+              _c("p", [
+                _vm._v(
+                  "There was an error, unable to sign in with those credentials."
+                )
+              ])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
         _c("div", { staticClass: "card-body" }, [
           _c(
             "form",
@@ -37827,12 +37842,7 @@ var render = function() {
                       }
                     ],
                     staticClass: "form-control",
-                    attrs: {
-                      id: "email",
-                      type: "email",
-                      required: "",
-                      autofocus: ""
-                    },
+                    attrs: { id: "email", type: "email" },
                     domProps: { value: _vm.user.email },
                     on: {
                       input: function($event) {
@@ -37867,7 +37877,7 @@ var render = function() {
                       }
                     ],
                     staticClass: "form-control",
-                    attrs: { id: "password", type: "password", required: "" },
+                    attrs: { id: "password", type: "password" },
                     domProps: { value: _vm.user.password },
                     on: {
                       input: function($event) {
