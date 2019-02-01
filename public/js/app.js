@@ -2237,10 +2237,24 @@ __webpack_require__.r(__webpack_exports__);
     initUpdateUser: function initUpdateUser(index) {
       this.errors = [];
       $("#update_user_model").modal("show");
-      this.update_task = this.users[index];
+      this.update_user = this.users[index];
     },
     updateUser: function updateUser() {
+      var _this4 = this;
+
       console.log('Updating');
+      var token = document.head.querySelector('meta[name="csrf-token"]');
+      window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token;
+      axios.put('/api/users/' + this.update_user.id, this.update_user).then(function (response) {
+        $("#update_user_model").modal("hide");
+
+        _this4.readUsers();
+      }).catch(function (error) {
+        if (error.response.status == 422) {
+          _this4.validationErrors = err.response.data.errors;
+        }
+      });
     }
   }
 });

@@ -257,10 +257,24 @@
       initUpdateUser(index) {
         this.errors = [];
         $("#update_user_model").modal("show");
-        this.update_task = this.users[index];
+        this.update_user = this.users[index];
       },
       updateUser() {
         console.log('Updating');
+        var token = document.head.querySelector('meta[name="csrf-token"]');
+        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token
+        axios.put('/api/users/' + this.update_user.id,
+          this.update_user
+        ).then(response => {
+            $("#update_user_model").modal("hide");
+            this.readUsers();
+          })
+          .catch(error => {
+            if (error.response.status == 422) {
+              this.validationErrors = err.response.data.errors;
+            }
+          });
       }
     }
   }
