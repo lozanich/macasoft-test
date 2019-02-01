@@ -185,17 +185,19 @@
           this.user.password_confirmation = '';
           this.user.id_rol = '';
         },
-        deleteUser() {
-          let conf = confirm("Do you ready want to delete this task?");
-          if (conf === true) {
-            axios.delete('/task/' + this.tasks[index].id)
+        deleteUser(index) {
+            console.log('deleting');
+            console.log(index);
+            axios.delete('/api/users/' + this.users[index].id)
               .then(response => {
-                this.tasks.splice(index, 1);
+                this.users.splice(index, 1);
+                this.readUsers();
               })
               .catch(error => {
-                console.log('delete user');
+                console.log('error delete user');
+                console.log(error);
               });
-          }
+
         },
       }
     }

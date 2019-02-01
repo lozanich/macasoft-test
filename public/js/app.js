@@ -2162,18 +2162,19 @@ __webpack_require__.r(__webpack_exports__);
       this.user.password_confirmation = '';
       this.user.id_rol = '';
     },
-    deleteUser: function deleteUser() {
+    deleteUser: function deleteUser(index) {
       var _this3 = this;
 
-      var conf = confirm("Do you ready want to delete this task?");
+      console.log('deleting');
+      console.log(index);
+      axios.delete('/api/users/' + this.users[index].id).then(function (response) {
+        _this3.users.splice(index, 1);
 
-      if (conf === true) {
-        axios.delete('/task/' + this.tasks[index].id).then(function (response) {
-          _this3.tasks.splice(index, 1);
-        }).catch(function (error) {
-          console.log('delete user');
-        });
-      }
+        _this3.readUsers();
+      }).catch(function (error) {
+        console.log('error delete user');
+        console.log(error);
+      });
     }
   }
 });
