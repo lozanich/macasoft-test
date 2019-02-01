@@ -31,7 +31,7 @@
               <td><img width="50" height="50" :src=" 'storage/images/'+user.user_photo"></td>
               <td>
                 <button class="btn btn-success btn-xs">Editar</button>
-                <button class="btn btn-danger btn-xs">Eliminar</button>
+                <button @click="deleteUser(index)" class="btn btn-danger btn-xs">Eliminar</button>
               </td>
             </tr>
             </tbody>
@@ -59,11 +59,23 @@
             <div class="form-group">
               <label for="email">Email:</label>
               <input type="email" name="email" id="email" placeholder="Email" class="form-control"
-              v-model="user.full_name">
+              v-model="user.email">
             </div>
 
             <div class="form-group">
-              <label for="rol">Example select</label>
+              <label for="password">Password:</label>
+              <input type="password" id="password" placeholder="Password" class="form-control"
+                     v-model="user.password">
+            </div>
+
+            <div class="form-group">
+              <label for="password_confirmation">Confirmacion de Password:</label>
+              <input type="password" id="password_confirmation" placeholder="Confirmacion de password" class="form-control"
+                     v-model="user.password_confirmation">
+            </div>
+
+            <div class="form-group">
+              <label for="rol">Selecciona Rol:</label>
               <select class="form-control" id="rol" v-model="user.id_rol">
                 <option value="1" selected>Administrador</option>
                 <option value="2">Usuario</option>
@@ -73,7 +85,7 @@
 
             <div class="form-group">
               <label for="user_photo">Foto del usuario</label>
-              <input type="file" class="form-control-file" id="user_photo" v-change="user.user_photo">
+              <input type="file" class="form-control-file" id="user_photo" @change="onImageChange">
             </div>
           </div>
           <div class="modal-footer">
@@ -98,11 +110,14 @@
             full_name: '',
             email: '',
             id_rol: '',
-            user_photo: ''
+            password: '',
+            password_confirmation: '',
+            user_photo: null,
           },
           errors: [],
           users: [],
-          validationErrors: ''
+          validationErrors: '',
+          image:''
         }
       },
       mounted()
@@ -112,6 +127,20 @@
         this.readUsers();
       },
       methods: {
+      onImageChange(e) {
+          let files = e.target.files || e.dataTransfer.files;
+          if (!files.length)
+            return;
+          this.createImage(files[0]);
+        },
+        createImage(file) {
+          let reader = new FileReader();
+          let vm = this;
+          reader.onload = (e) => {
+            vm.user.user_photo = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        },
         initAddUser()
         {
           $("#add_task_model").modal("show");
@@ -119,6 +148,24 @@
         createUser()
         {
           console.log('creating user');
+          console.log(this.user.user_photo);
+          var token = document.head.querySelector('meta[name="csrf-token"]');
+          window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+          window.axios.defaults.headers.common['content-type'] = 'multipart/form-data';
+          axios.defaults.headers.common['Authorization'] = 'Bearer '+ this.api_token
+          axios.post('api/users',
+            this.user
+          )
+            .then(response => {
+              this.reset();
+              this.readUsers();
+              this.users = response.data;
+              $("#add_task_model").modal("hide");
+            }).catch((err) => {
+              if (err.response.status == 422){
+                this.validationErrors = err.response.data.errors;
+              }
+            });
         },
         readUsers()
         {
@@ -129,7 +176,27 @@
             .then(response => {
               this.users = response.data;
             });
-        }
+        },
+        reset()
+        {
+          this.user.full_name = '';
+          this.user.email = '';
+          this.user.password = '';
+          this.user.password_confirmation = '';
+          this.user.id_rol = '';
+        },
+        deleteUser() {
+          let conf = confirm("Do you ready want to delete this task?");
+          if (conf === true) {
+            axios.delete('/task/' + this.tasks[index].id)
+              .then(response => {
+                this.tasks.splice(index, 1);
+              })
+              .catch(error => {
+                console.log('delete user');
+              });
+          }
+        },
       }
     }
 </script>

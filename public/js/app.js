@@ -2066,6 +2066,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   /*name: "IndexUserComponent"*/
   data: function data() {
@@ -2077,11 +2089,14 @@ __webpack_require__.r(__webpack_exports__);
         full_name: '',
         email: '',
         id_rol: '',
-        user_photo: ''
+        password: '',
+        password_confirmation: '',
+        user_photo: null
       },
       errors: [],
       users: [],
-      validationErrors: ''
+      validationErrors: '',
+      image: ''
     };
   },
   mounted: function mounted() {
@@ -2090,21 +2105,75 @@ __webpack_require__.r(__webpack_exports__);
     this.readUsers();
   },
   methods: {
+    onImageChange: function onImageChange(e) {
+      var files = e.target.files || e.dataTransfer.files;
+      if (!files.length) return;
+      this.createImage(files[0]);
+    },
+    createImage: function createImage(file) {
+      var reader = new FileReader();
+      var vm = this;
+
+      reader.onload = function (e) {
+        vm.user.user_photo = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    },
     initAddUser: function initAddUser() {
       $("#add_task_model").modal("show");
     },
     createUser: function createUser() {
+      var _this = this;
+
       console.log('creating user');
+      console.log(this.user.user_photo);
+      var token = document.head.querySelector('meta[name="csrf-token"]');
+      window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+      window.axios.defaults.headers.common['content-type'] = 'multipart/form-data';
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token;
+      axios.post('api/users', this.user).then(function (response) {
+        _this.reset();
+
+        _this.readUsers();
+
+        _this.users = response.data;
+        $("#add_task_model").modal("hide");
+      }).catch(function (err) {
+        if (err.response.status == 422) {
+          _this.validationErrors = err.response.data.errors;
+        }
+      });
     },
     readUsers: function readUsers() {
-      var _this = this;
+      var _this2 = this;
 
       var token = document.head.querySelector('meta[name="csrf-token"]');
       window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + this.api_token;
       axios.get('api/users').then(function (response) {
-        _this.users = response.data;
+        _this2.users = response.data;
       });
+    },
+    reset: function reset() {
+      this.user.full_name = '';
+      this.user.email = '';
+      this.user.password = '';
+      this.user.password_confirmation = '';
+      this.user.id_rol = '';
+    },
+    deleteUser: function deleteUser() {
+      var _this3 = this;
+
+      var conf = confirm("Do you ready want to delete this task?");
+
+      if (conf === true) {
+        axios.delete('/task/' + this.tasks[index].id).then(function (response) {
+          _this3.tasks.splice(index, 1);
+        }).catch(function (error) {
+          console.log('delete user');
+        });
+      }
     }
   }
 });
@@ -38042,7 +38111,24 @@ var render = function() {
                     })
                   ]),
                   _vm._v(" "),
-                  _vm._m(1, true)
+                  _c("td", [
+                    _c("button", { staticClass: "btn btn-success btn-xs" }, [
+                      _vm._v("Editar")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger btn-xs",
+                        on: {
+                          click: function($event) {
+                            _vm.deleteUser(index)
+                          }
+                        }
+                      },
+                      [_vm._v("Eliminar")]
+                    )
+                  ])
                 ])
               }),
               0
@@ -38067,7 +38153,7 @@ var render = function() {
               "div",
               { staticClass: "modal-content" },
               [
-                _vm._m(2),
+                _vm._m(1),
                 _vm._v(" "),
                 _vm.validationErrors
                   ? _c("validation-errors", {
@@ -38119,8 +38205,8 @@ var render = function() {
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.user.full_name,
-                          expression: "user.full_name"
+                          value: _vm.user.email,
+                          expression: "user.email"
                         }
                       ],
                       staticClass: "form-control",
@@ -38130,13 +38216,81 @@ var render = function() {
                         id: "email",
                         placeholder: "Email"
                       },
-                      domProps: { value: _vm.user.full_name },
+                      domProps: { value: _vm.user.email },
                       on: {
                         input: function($event) {
                           if ($event.target.composing) {
                             return
                           }
-                          _vm.$set(_vm.user, "full_name", $event.target.value)
+                          _vm.$set(_vm.user, "email", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "password" } }, [
+                      _vm._v("Password:")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.password,
+                          expression: "user.password"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "password",
+                        id: "password",
+                        placeholder: "Password"
+                      },
+                      domProps: { value: _vm.user.password },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.user, "password", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", { attrs: { for: "password_confirmation" } }, [
+                      _vm._v("Confirmacion de Password:")
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.user.password_confirmation,
+                          expression: "user.password_confirmation"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      attrs: {
+                        type: "password",
+                        id: "password_confirmation",
+                        placeholder: "Confirmacion de password"
+                      },
+                      domProps: { value: _vm.user.password_confirmation },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.user,
+                            "password_confirmation",
+                            $event.target.value
+                          )
                         }
                       }
                     })
@@ -38144,7 +38298,7 @@ var render = function() {
                   _vm._v(" "),
                   _c("div", { staticClass: "form-group" }, [
                     _c("label", { attrs: { for: "rol" } }, [
-                      _vm._v("Example select")
+                      _vm._v("Selecciona Rol:")
                     ]),
                     _vm._v(" "),
                     _c(
@@ -38202,16 +38356,9 @@ var render = function() {
                     ]),
                     _vm._v(" "),
                     _c("input", {
-                      directives: [
-                        {
-                          name: "change",
-                          rawName: "v-change",
-                          value: _vm.user.user_photo,
-                          expression: "user.user_photo"
-                        }
-                      ],
                       staticClass: "form-control-file",
-                      attrs: { type: "file", id: "user_photo" }
+                      attrs: { type: "file", id: "user_photo" },
+                      on: { change: _vm.onImageChange }
                     })
                   ])
                 ]),
@@ -38263,20 +38410,6 @@ var staticRenderFns = [
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Foto")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Acciones")])
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c("button", { staticClass: "btn btn-success btn-xs" }, [
-        _vm._v("Editar")
-      ]),
-      _vm._v(" "),
-      _c("button", { staticClass: "btn btn-danger btn-xs" }, [
-        _vm._v("Eliminar")
       ])
     ])
   },
@@ -53009,8 +53142,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\ivan.lozano\Documents\Code\macasoft-test\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Users\ivan.lozano\Documents\Code\macasoft-test\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Users\ilozano\code\test-macasoft\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Users\ilozano\code\test-macasoft\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
