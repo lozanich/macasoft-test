@@ -38,7 +38,7 @@ class UserApiController extends Controller
         dd($imageName);*/
 
         $user = User::make($request->all());
-        $user->user_photo = 'test.png';
+        //$user->user_photo = 'test.png';
         $user->save();
         return response()->json($user->toArray());
     }
